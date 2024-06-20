@@ -9,7 +9,7 @@ app.use(express.json());
 
 // let products = []; //in memory storage
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.lbhoupe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,11 +29,12 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
+    const productsCollection = client.db("brand_shop").collection("products");
 
     app.get("/products", async (req, res) => {
-      const productsCollection = client.db("brand_shop").collection("products");
-      const cursor = productsCollection.find()
-      const result = await cursor.toArray()
+      //   const productsCollection = client.db("brand_shop").collection("products");
+      const cursor = productsCollection.find();
+      const result = await cursor.toArray();
       res.send(result);
     });
 
@@ -41,8 +42,16 @@ async function run() {
       const product = req.body;
       //   products.push(product);
       //   console.log(product);
-      const productsCollection = client.db("brand_shop").collection("products");
+      //   const productsCollection = client.db("brand_shop").collection("products");
       const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+    //   console.log(req);
+      const query = { _id: new ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
       res.send(result);
     });
   } catch {

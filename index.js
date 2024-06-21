@@ -31,9 +31,9 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
     const productsCollection = client.db("brand_shop").collection("products");
+    const usersCollection = client.db("brand_shop").collection("users");
 
     app.get("/products", async (req, res) => {
-      //   const productsCollection = client.db("brand_shop").collection("products");
       const cursor = productsCollection.find();
       const result = await cursor.toArray();
       res.send(result);
@@ -46,18 +46,26 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users", async (req, res) => {
+      const cursor = usersCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
     app.post("/products", async (req, res) => {
       const product = req.body;
-      //   products.push(product);
-      //   console.log(product);
-      //   const productsCollection = client.db("brand_shop").collection("products");
       const result = await productsCollection.insertOne(product);
       res.send(result);
     });
 
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    })
+
     app.delete("/products/:id", async (req, res) => {
       const id = req.params.id;
-      //   console.log(req);
       const query = { _id: new ObjectId(id) };
       const result = await productsCollection.deleteOne(query);
       res.send(result);

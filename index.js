@@ -20,7 +20,6 @@ const client = new MongoClient(uri, {
   },
 });
 
-
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -34,66 +33,101 @@ async function run() {
     const usersCollection = client.db("brand_shop").collection("users");
 
     app.get("/products", async (req, res) => {
-      const cursor = productsCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
+      try {
+        const cursor = productsCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.get("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await productsCollection.findOne(query);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await productsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.get("/users", async (req, res) => {
-      const cursor = usersCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    })
+      try {
+        const cursor = usersCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
 
     app.post("/products", async (req, res) => {
-      const product = req.body;
-      const result = await productsCollection.insertOne(product);
-      res.send(result);
+      try {
+        const product = req.body;
+        const result = await productsCollection.insertOne(product);
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.post("/users", async (req, res) => {
-      const user = req.body;
-      const result = await usersCollection.insertOne(user);
-      res.send(result);
-    })
+      try {
+        const user = req.body;
+        const result = await usersCollection.insertOne(user);
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
 
     app.delete("/products/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await productsCollection.deleteOne(query);
-      res.send(result);
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await productsCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     app.put("/products/:id", async (req, res) => {
-      const updatedDoc = req.body;
-      const product = {
-        $set: {
-          name: updatedDoc.updatedName,
-          imageUrl: updatedDoc.updatedImageUrl,
-          brandName: updatedDoc.updatedBrandName,
-          price: updatedDoc.updatedPrice,
-          description: updatedDoc.updatedDescription,
-          rating: updatedDoc.updatedRating,
-        },
-      };
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const options = { upsert: true };
-      const result = await productsCollection.updateOne(
-        query,
-        product,
-        options
-      );
-      res.send(result);
+      try {
+        const updatedDoc = req.body;
+        const product = {
+          $set: {
+            name: updatedDoc.updatedName,
+            imageUrl: updatedDoc.updatedImageUrl,
+            brandName: updatedDoc.updatedBrandName,
+            price: updatedDoc.updatedPrice,
+            description: updatedDoc.updatedDescription,
+            rating: updatedDoc.updatedRating,
+          },
+        };
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const result = await productsCollection.updateOne(
+          query,
+          product,
+          options
+        );
+        res.send(result);
+      } catch (error) {
+        console.error("Error handling /products route:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
-  } catch {
+  } catch (error) {
     throw new Error("Something went wrong on the server!", error);
   } finally {
     // Ensures that the client will close when you finish/error
@@ -103,7 +137,7 @@ async function run() {
 run().catch(console.log);
 
 app.get("/", (req, res) => {
-  res.send("server running properly");
+  res.send("Electronics store server running properly...");
 });
 
 app.listen(port, () => {

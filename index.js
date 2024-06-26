@@ -4,10 +4,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 
+console.log('DB_USERNAME:', process.env.DB_USERNAME);
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
+
 app.use(cors());
 app.use(express.json());
-
-// let products = []; //in memory storage
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.lbhoupe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -32,75 +33,69 @@ async function run() {
     const productsCollection = client.db("brand_shop").collection("products");
     const usersCollection = client.db("brand_shop").collection("users");
 
-    app.get("/products", async (req, res) => {
+    app.get("/products", async (req, res, next) => {
       try {
         const cursor = productsCollection.find();
         const result = await cursor.toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.get("/products/:id", async (req, res) => {
+    app.get("/products/:id", async (req, res, next) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
         const result = await productsCollection.findOne(query);
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.get("/users", async (req, res) => {
+    app.get("/users", async (req, res, next) => {
       try {
         const cursor = usersCollection.find();
         const result = await cursor.toArray();
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.post("/products", async (req, res) => {
+    app.post("/products", async (req, res, next) => {
       try {
         const product = req.body;
         const result = await productsCollection.insertOne(product);
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.post("/users", async (req, res) => {
+    app.post("/users", async (req, res, next) => {
       try {
         const user = req.body;
         const result = await usersCollection.insertOne(user);
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.delete("/products/:id", async (req, res) => {
+    app.delete("/products/:id", async (req, res, next) => {
       try {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) };
         const result = await productsCollection.deleteOne(query);
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
 
-    app.put("/products/:id", async (req, res) => {
+    app.put("/products/:id", async (req, res, next) => {
       try {
         const updatedDoc = req.body;
         const product = {
@@ -123,18 +118,17 @@ async function run() {
         );
         res.send(result);
       } catch (error) {
-        console.error("Error handling /products route:", error);
-        res.status(500).send("Internal Server Error");
+        next(error);
       }
     });
   } catch (error) {
-    throw new Error("Something went wrong on the server!", error);
+    console.error("Database connection error:", error);
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
-run().catch(console.log);
+run().catch(console.error);
 
 app.get("/", (req, res) => {
   res.send("Electronics store server running properly...");
@@ -142,6 +136,12 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Running on port:${port}`);
+});
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 module.exports = app;
